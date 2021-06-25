@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package otaku.anime;
+
+option go_package = "github.com/AkashGit21/Otaku_API/proto/anime;animepb";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+
+service AnimeService {
+  // RPC for fetching the list of Animes
+  rpc ListAnimes (google.protobuf.Empty) returns (ListAnimesResponse) {
+    option (google.api.http) = {
+      get: "/v1/animes"
+    };
+  }
+
+
+}
+
+message Anime {
+  // Name (Title) of the Anime 
+  string name = 1;
+  // Short description of Anime, at most 50 words
+  string description = 2;
+  // Number of Episodes in the particular Anime
+  int32 num_of_episodes = 3;
+  // Cast of that Anime
+  repeated string cast = 4;
+  // Status of the Anime
+  Status status = 5;
+
+  enum Status {
+      UNKNOWN = 0;    
+      
+    ONGOING = 1;
+    COMPLETED = 2;
+    UPCOMING = 3;
+  }
+}
+
+message ListAnimesResponse {
+  repeated Anime animes = 1;
+}

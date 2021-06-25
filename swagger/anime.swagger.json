@@ -1,0 +1,125 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "anime.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "AnimeService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/animes": {
+      "get": {
+        "summary": "RPC for fetching the list of Animes",
+        "operationId": "AnimeService_ListAnimes",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/animeListAnimesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "AnimeService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "animeAnime": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Name (Title) of the Anime"
+        },
+        "description": {
+          "type": "string",
+          "title": "Short description of Anime, at most 50 words"
+        },
+        "numOfEpisodes": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Number of Episodes in the particular Anime"
+        },
+        "cast": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Cast of that Anime"
+        },
+        "status": {
+          "$ref": "#/definitions/animeAnimeStatus",
+          "title": "Status of the Anime"
+        }
+      }
+    },
+    "animeAnimeStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "ONGOING",
+        "COMPLETED",
+        "UPCOMING"
+      ],
+      "default": "UNKNOWN"
+    },
+    "animeListAnimesResponse": {
+      "type": "object",
+      "properties": {
+        "animes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/animeAnime"
+          }
+        }
+      }
+    },
+    "googlerpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    }
+  }
+}
