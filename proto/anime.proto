@@ -5,41 +5,148 @@ package otaku.anime;
 option go_package = "github.com/AkashGit21/Otaku_API/proto/anime;animepb";
 
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
 
 
 service AnimeService {
-  // RPC for fetching the list of Animes
-  rpc ListAnimes (google.protobuf.Empty) returns (ListAnimesResponse) {
+  // Lists Animes with desired Criteria
+  rpc ListAnimes (ListAnimesRequest) returns (ListAnimesResponse) {
     option (google.api.http) = {
       get: "/v1/animes"
     };
   }
 
+  // Creates Anime with given data 
+  rpc CreateAnime (CreateAnimeRequest) returns (CreateAnimeResponse) {
+    option (google.api.http) = {
+      post: "/v1/animes"
+      body: "anime"
+    };
+  }
 
-}
+  // Get Anime with given ID
+  rpc GetAnime (GetAnimeRequest) returns (GetAnimeResponse) {
+    option (google.api.http) = {
+      get: "/v1/animes/{id}"
+    };
+  }
 
-message Anime {
-  // Name (Title) of the Anime 
-  string name = 1;
-  // Short description of Anime, at most 50 words
-  string description = 2;
-  // Number of Episodes in the particular Anime
-  int32 num_of_episodes = 3;
-  // Cast of that Anime
-  repeated string cast = 4;
-  // Status of the Anime
-  Status status = 5;
+  // Updates an existing Anime with given ID. Note that some properties such as ID are not modifiable.
+  rpc UpdateAnime (UpdateAnimeRequest) returns (Anime) {
+    option (google.api.http) = {
+      patch: "/v1/animes/{id}"
+      body: "anime"
+    };
+  }
 
-  enum Status {
-      UNKNOWN = 0;    
-      
-    ONGOING = 1;
-    COMPLETED = 2;
-    UPCOMING = 3;
+  // Delete
+  rpc DeleteAnime (DeleteAnimeRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/animes/{id}"
+    };
   }
 }
 
+// Structure of Anime Object
+message Anime {
+  string id = 1;
+  // Name (Title) of the Anime 
+  string name = 2;
+  // Short description of Anime, at most 50 words
+  string description = 3;
+  // Number of Episodes in the particular Anime
+  int32 num_of_episodes = 4;
+  // Cast of that Anime
+  repeated string cast = 5;
+  // Status of the Anime
+  string status = 6;
+  // Genre of the Anime
+  repeated string genre = 7;
+  // Time of Creating the Record for Anime
+  string created_at = 10;
+
+  // // Defining the Enum Status
+  // enum Status {
+  //   UNKNOWN = 0;
+  //   // For Ongoing Anime
+  //   ONGOING = 1;
+  //   // For Completed Anime
+  //   COMPLETED = 2;
+  //   // For the Anime to be released shortly
+  //   UPCOMING = 3;
+  // }
+}
+
+// Structure of ListAnimes Request
+message ListAnimesRequest {
+  // Page number requested
+  int32 page = 1;
+  // The option to sort by - 
+  Sort sort = 2;
+  // Order of Sorting - Ascending/Descending
+  Order order = 3;
+  // Filters for search or display
+  repeated string filter = 4; 
+  // The substring for search query
+  string search = 5;
+
+  // Defining the Enum Sort
+  enum Sort {
+    // Option to Sort by Name
+    NAME = 0;
+    // Option to sort by number of Episodes
+    NUMOFEPISODES = 1;
+    // Option to Sort by Rating
+    RATING = 2;
+  }
+
+  // Defining the Enum Order 
+  enum Order {    
+    // Option for Ordering in Descending format
+    DESCENDING = 0;
+    // Option for Ordering in Ascending format
+    ASCENDING = 1;
+  }
+}
+
+// Structure of ListAnimes Response
 message ListAnimesResponse {
+  // List of Animes to be returned
   repeated Anime animes = 1;
+}
+
+message CreateAnimeRequest {
+  Anime anime = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message CreateAnimeResponse {
+  string id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message GetAnimeRequest {
+  string id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message GetAnimeResponse {
+  Anime anime = 1;
+}
+
+message UpdateAnimeRequest {
+  string id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+  Anime anime = 2;
+}
+
+message DeleteAnimeRequest {
+  string id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }

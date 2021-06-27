@@ -19,8 +19,16 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AnimeServiceClient interface {
-	// RPC for fetching the list of Animes
-	ListAnimes(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListAnimesResponse, error)
+	// Lists Animes with desired Criteria
+	ListAnimes(ctx context.Context, in *ListAnimesRequest, opts ...grpc.CallOption) (*ListAnimesResponse, error)
+	// Creates Anime with given data
+	CreateAnime(ctx context.Context, in *CreateAnimeRequest, opts ...grpc.CallOption) (*CreateAnimeResponse, error)
+	// Get Anime with given ID
+	GetAnime(ctx context.Context, in *GetAnimeRequest, opts ...grpc.CallOption) (*GetAnimeResponse, error)
+	// Updates an existing Anime with given ID. Note that some properties such as ID are not modifiable.
+	UpdateAnime(ctx context.Context, in *UpdateAnimeRequest, opts ...grpc.CallOption) (*Anime, error)
+	// Delete
+	DeleteAnime(ctx context.Context, in *DeleteAnimeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type animeServiceClient struct {
@@ -31,9 +39,45 @@ func NewAnimeServiceClient(cc grpc.ClientConnInterface) AnimeServiceClient {
 	return &animeServiceClient{cc}
 }
 
-func (c *animeServiceClient) ListAnimes(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListAnimesResponse, error) {
+func (c *animeServiceClient) ListAnimes(ctx context.Context, in *ListAnimesRequest, opts ...grpc.CallOption) (*ListAnimesResponse, error) {
 	out := new(ListAnimesResponse)
 	err := c.cc.Invoke(ctx, "/otaku.anime.AnimeService/ListAnimes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *animeServiceClient) CreateAnime(ctx context.Context, in *CreateAnimeRequest, opts ...grpc.CallOption) (*CreateAnimeResponse, error) {
+	out := new(CreateAnimeResponse)
+	err := c.cc.Invoke(ctx, "/otaku.anime.AnimeService/CreateAnime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *animeServiceClient) GetAnime(ctx context.Context, in *GetAnimeRequest, opts ...grpc.CallOption) (*GetAnimeResponse, error) {
+	out := new(GetAnimeResponse)
+	err := c.cc.Invoke(ctx, "/otaku.anime.AnimeService/GetAnime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *animeServiceClient) UpdateAnime(ctx context.Context, in *UpdateAnimeRequest, opts ...grpc.CallOption) (*Anime, error) {
+	out := new(Anime)
+	err := c.cc.Invoke(ctx, "/otaku.anime.AnimeService/UpdateAnime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *animeServiceClient) DeleteAnime(ctx context.Context, in *DeleteAnimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/otaku.anime.AnimeService/DeleteAnime", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +88,16 @@ func (c *animeServiceClient) ListAnimes(ctx context.Context, in *empty.Empty, op
 // All implementations must embed UnimplementedAnimeServiceServer
 // for forward compatibility
 type AnimeServiceServer interface {
-	// RPC for fetching the list of Animes
-	ListAnimes(context.Context, *empty.Empty) (*ListAnimesResponse, error)
+	// Lists Animes with desired Criteria
+	ListAnimes(context.Context, *ListAnimesRequest) (*ListAnimesResponse, error)
+	// Creates Anime with given data
+	CreateAnime(context.Context, *CreateAnimeRequest) (*CreateAnimeResponse, error)
+	// Get Anime with given ID
+	GetAnime(context.Context, *GetAnimeRequest) (*GetAnimeResponse, error)
+	// Updates an existing Anime with given ID. Note that some properties such as ID are not modifiable.
+	UpdateAnime(context.Context, *UpdateAnimeRequest) (*Anime, error)
+	// Delete
+	DeleteAnime(context.Context, *DeleteAnimeRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedAnimeServiceServer()
 }
 
@@ -53,8 +105,20 @@ type AnimeServiceServer interface {
 type UnimplementedAnimeServiceServer struct {
 }
 
-func (UnimplementedAnimeServiceServer) ListAnimes(context.Context, *empty.Empty) (*ListAnimesResponse, error) {
+func (UnimplementedAnimeServiceServer) ListAnimes(context.Context, *ListAnimesRequest) (*ListAnimesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAnimes not implemented")
+}
+func (UnimplementedAnimeServiceServer) CreateAnime(context.Context, *CreateAnimeRequest) (*CreateAnimeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAnime not implemented")
+}
+func (UnimplementedAnimeServiceServer) GetAnime(context.Context, *GetAnimeRequest) (*GetAnimeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAnime not implemented")
+}
+func (UnimplementedAnimeServiceServer) UpdateAnime(context.Context, *UpdateAnimeRequest) (*Anime, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAnime not implemented")
+}
+func (UnimplementedAnimeServiceServer) DeleteAnime(context.Context, *DeleteAnimeRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAnime not implemented")
 }
 func (UnimplementedAnimeServiceServer) mustEmbedUnimplementedAnimeServiceServer() {}
 
@@ -70,7 +134,7 @@ func RegisterAnimeServiceServer(s grpc.ServiceRegistrar, srv AnimeServiceServer)
 }
 
 func _AnimeService_ListAnimes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(ListAnimesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -82,7 +146,79 @@ func _AnimeService_ListAnimes_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/otaku.anime.AnimeService/ListAnimes",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AnimeServiceServer).ListAnimes(ctx, req.(*empty.Empty))
+		return srv.(AnimeServiceServer).ListAnimes(ctx, req.(*ListAnimesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AnimeService_CreateAnime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAnimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AnimeServiceServer).CreateAnime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/otaku.anime.AnimeService/CreateAnime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AnimeServiceServer).CreateAnime(ctx, req.(*CreateAnimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AnimeService_GetAnime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAnimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AnimeServiceServer).GetAnime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/otaku.anime.AnimeService/GetAnime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AnimeServiceServer).GetAnime(ctx, req.(*GetAnimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AnimeService_UpdateAnime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAnimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AnimeServiceServer).UpdateAnime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/otaku.anime.AnimeService/UpdateAnime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AnimeServiceServer).UpdateAnime(ctx, req.(*UpdateAnimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AnimeService_DeleteAnime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAnimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AnimeServiceServer).DeleteAnime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/otaku.anime.AnimeService/DeleteAnime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AnimeServiceServer).DeleteAnime(ctx, req.(*DeleteAnimeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -97,6 +233,22 @@ var AnimeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAnimes",
 			Handler:    _AnimeService_ListAnimes_Handler,
+		},
+		{
+			MethodName: "CreateAnime",
+			Handler:    _AnimeService_CreateAnime_Handler,
+		},
+		{
+			MethodName: "GetAnime",
+			Handler:    _AnimeService_GetAnime_Handler,
+		},
+		{
+			MethodName: "UpdateAnime",
+			Handler:    _AnimeService_UpdateAnime_Handler,
+		},
+		{
+			MethodName: "DeleteAnime",
+			Handler:    _AnimeService_DeleteAnime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
