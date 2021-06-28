@@ -18,7 +18,7 @@
   "paths": {
     "/v1/animes": {
       "get": {
-        "summary": "RPC for fetching the list of Animes",
+        "summary": "Lists Animes with desired Criteria",
         "operationId": "AnimeService_ListAnimes",
         "responses": {
           "200": {
@@ -30,10 +30,185 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
+        "parameters": [
+          {
+            "name": "page",
+            "description": "Page number requested.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "sort",
+            "description": "The option to sort by - Name/Status/Released.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "order",
+            "description": "Order of Sorting - Ascending/Descending.\n\n - ASC: Option for Ordering in Ascending format\n - DESC: Option for Ordering in Descending format",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "default": "ASC"
+          },
+          {
+            "name": "filter",
+            "description": "Filters for search or display.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "search",
+            "description": "The substring for search query.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AnimeService"
+        ]
+      },
+      "post": {
+        "summary": "Creates Anime with given data",
+        "operationId": "AnimeService_CreateAnime",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/animeCreateAnimeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/animeAnime"
+            }
+          }
+        ],
+        "tags": [
+          "AnimeService"
+        ]
+      }
+    },
+    "/v1/animes/{id}": {
+      "get": {
+        "summary": "Get Anime with given ID",
+        "operationId": "AnimeService_GetAnime",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/animeGetAnimeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AnimeService"
+        ]
+      },
+      "delete": {
+        "summary": "Delete",
+        "operationId": "AnimeService_DeleteAnime",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AnimeService"
+        ]
+      },
+      "patch": {
+        "summary": "Updates an existing Anime with given ID. Note that some properties such as ID are not modifiable.",
+        "operationId": "AnimeService_UpdateAnime",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/animeAnime"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/animeAnime"
+            }
+          }
+        ],
         "tags": [
           "AnimeService"
         ]
@@ -41,14 +216,31 @@
     }
   },
   "definitions": {
+    "ListAnimesRequestOrder": {
+      "type": "string",
+      "enum": [
+        "ASC",
+        "DESC"
+      ],
+      "default": "ASC",
+      "description": "- ASC: Option for Ordering in Ascending format\n - DESC: Option for Ordering in Descending format",
+      "title": "Defining the Enum Order"
+    },
     "animeAnime": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "name": {
           "type": "string",
           "title": "Name (Title) of the Anime"
         },
-        "description": {
+        "type": {
+          "type": "string",
+          "title": "Type of Anime - TV Series/Netflix Original/Web Series"
+        },
+        "summary": {
           "type": "string",
           "title": "Short description of Anime, at most 50 words"
         },
@@ -57,7 +249,7 @@
           "format": "int32",
           "title": "Number of Episodes in the particular Anime"
         },
-        "cast": {
+        "otherNames": {
           "type": "array",
           "items": {
             "type": "string"
@@ -65,20 +257,49 @@
           "title": "Cast of that Anime"
         },
         "status": {
-          "$ref": "#/definitions/animeAnimeStatus",
+          "type": "string",
           "title": "Status of the Anime"
+        },
+        "genre": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Genre of the Anime"
+        },
+        "released": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Year of release of the Anime"
+        },
+        "createdAt": {
+          "type": "string",
+          "title": "Time of Creating the Record for Anime"
+        }
+      },
+      "title": "Structure of Anime Object"
+    },
+    "animeCreateAnimeResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "required": [
+            "id"
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "animeGetAnimeResponse": {
+      "type": "object",
+      "properties": {
+        "anime": {
+          "$ref": "#/definitions/animeAnime"
         }
       }
-    },
-    "animeAnimeStatus": {
-      "type": "string",
-      "enum": [
-        "UNKNOWN",
-        "ONGOING",
-        "COMPLETED",
-        "UPCOMING"
-      ],
-      "default": "UNKNOWN"
     },
     "animeListAnimesResponse": {
       "type": "object",
@@ -87,11 +308,25 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/animeAnime"
-          }
+          },
+          "title": "List of Animes to be returned"
+        }
+      },
+      "title": "Structure of ListAnimes Response"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
         }
       }
     },
-    "googlerpcStatus": {
+    "rpcStatus": {
       "type": "object",
       "properties": {
         "code": {
@@ -106,18 +341,6 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
-        }
-      }
-    },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "typeUrl": {
-          "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
         }
       }
     }

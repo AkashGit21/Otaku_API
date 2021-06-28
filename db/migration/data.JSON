@@ -1,0 +1,24 @@
+
+[
+  {
+    "name": "Naruto Shippuden",
+    "type": "TV Series",
+    "summary": "Naruto Shippuden is a continuation of original series Naruto. After 2 and a half years of training with his master, Naruto finally returns to his village of Konoha. Naruto is now older and more mature than before. With his new trained ability, his goal of searching for long lost friend, Uchiha Sasuke, is set for a stronger determination than before. Naruto Shippuden is a continuation of original series Naruto. After 2 and a half years of training with his master, Naruto finally returns to his village of Konoha. Naruto is now older and more mature than before. With his new trained ability, his goal of searching for long lost friend, Uchiha Sasuke, is set for a stronger determination than before. He is putting his ambitions to work along with the help of his many friends, though with so many obstacles ahead of him. Now, he will face even more dangerous enemies, especially the Akatsuki.",
+    "numOfEpisodes": 500,
+    "otherNames": ["Naruto: Shippuden", "ナルト- 疾風伝"],
+    "status": "COMPLETED",
+    "genre": ["Action", "Comedy", "Martial Arts", "Shounen", "Super Power"],
+    "released": 2007
+  },
+
+  {
+    "name": "Naruto",
+    "type":"TV Series",
+    "summary": " In a world of mystical and powerful enemies lurk in every nation, a legendary Nine-Tailed Demon Fox attacked the ninja village Konoha, killing many innocent people. In response of a desperate measure from the people, the leader of the village – the Fourth Hokage – sacrificed his life to defeat the demon fox. By sacrificing his own life, he sealed the demon fox into a very young boy named, Naruto Uzumaki. Naruto has lost his parents during the attack. He grew up in the village and was mistreated badly by everyone in town. With his loud mouth and careless attitude, he is determined to become the greatest ninja, hokage, in his village. Along with friends, and hope, Naruto trains to become a better ninja than expected.",
+    "numOfEpisodes": 250,
+    "otherNames": ["ナルト"],
+    "status":"COMPLETED",
+    "genre":["Action", "Comedy", "Martial Arts", "Shounen", "Super Power"],
+    "released": 2002
+  }
+]
