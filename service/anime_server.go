@@ -15,12 +15,12 @@ import (
 
 var dbQueries *db.Queries
 
-//
+// AnimeServer
 type AnimeServer struct {
 	animepb.UnimplementedAnimeServiceServer
 }
 
-//
+// NewAnimeServer creates a new AnimeServer
 func NewAnimeServer() *AnimeServer {
 	return &AnimeServer{}
 }
@@ -30,7 +30,13 @@ func (server *AnimeServer) ListAnimes(ctx context.Context, req *animepb.ListAnim
 	log.Printf("Received ListAnimes Request from Server: %v\n", req)
 
 	page := req.GetPage()
+	if page == 0 {
+		page = 1
+	}
 	sort := req.GetSort()
+	if sort == "" {
+		sort = "name"
+	}
 	order := req.GetOrder()
 	filters := req.GetFilter()
 	searchQuery := req.GetSearch()
@@ -54,7 +60,13 @@ func (server *AnimeServer) ListAnimes(ctx context.Context, req *animepb.ListAnim
 		return nil, status.Error(codes.Canceled, "Request is Canceled")
 	}
 
-	res, err := dbQueries.ListAnimes(ctx, 1)
+	args := db.ListAnimesParams{
+		Column1: searchQuery,
+		Column2: page,
+		// Column3: "animes." + sort,
+	}
+
+	res, err := dbQueries.ListAnimes(ctx, args)
 	if err != nil {
 		log.Fatalf("Error while asking response from DB for ListAnimes: %v\n", err)
 		return nil, err
@@ -72,6 +84,10 @@ func (server *AnimeServer) CreateAnime(ctx context.Context, req *animepb.CreateA
 
 	log.Printf("Received CreateAnime Request from Server: %v", req)
 
+	data := req.Anime
+	// Validate the incoming data meets the required conditions
+	// validateData(data)
+
 	dbQueries, err := db.MakeConnection(dbQueries)
 	if err != nil {
 		log.Fatalf("Error while making DB connection\n")
@@ -88,7 +104,6 @@ func (server *AnimeServer) CreateAnime(ctx context.Context, req *animepb.CreateA
 		return nil, status.Error(codes.Canceled, "Request is Canceled")
 	}
 
-	data := req.Anime
 	res, err := dbQueries.CreateAnime(ctx, data)
 
 	out := &animepb.CreateAnimeResponse{
@@ -109,6 +124,23 @@ func (server *AnimeServer) GetAnime(ctx context.Context, req *animepb.GetAnimeRe
 		return nil, err
 	}
 
+	id, err := strconv.ParseInt(req.GetId(), 10, 64)
+	if err != nil {
+		log.Printf("Id is not in proper Format\n")
+		return nil, status.Errorf(codes.InvalidArgument, "Id is not in proper Format")
+	}
+
+	found, err := dbQueries.CheckID(ctx, id)
+	if err != nil {
+		log.Fatalf("Error while checking the ID")
+		return nil, err
+	}
+
+	if !found {
+		log.Printf("ID:%v is not present in Database", id)
+		return nil, status.Errorf(codes.NotFound, "ID is not found")
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		log.Printf("Deadline is Exceeded")
 		return nil, status.Error(codes.DeadlineExceeded, "Request deadline Exceeded")
@@ -117,12 +149,6 @@ func (server *AnimeServer) GetAnime(ctx context.Context, req *animepb.GetAnimeRe
 	if ctx.Err() == context.Canceled {
 		log.Printf("Request is Canceled")
 		return nil, status.Error(codes.Canceled, "Request is Canceled")
-	}
-
-	id, err := strconv.ParseInt(req.GetId(), 10, 64)
-	if err != nil {
-		log.Fatalf("Id is not in proper Format\n")
-		return nil, err
 	}
 
 	res, err := dbQueries.GetAnime(ctx, id)
@@ -148,6 +174,27 @@ func (server *AnimeServer) UpdateAnime(ctx context.Context, req *animepb.UpdateA
 		return nil, err
 	}
 
+	id, err := strconv.ParseInt(req.GetId(), 10, 64)
+	if err != nil {
+		log.Printf("Id is not in proper Format\n")
+		return nil, status.Errorf(codes.InvalidArgument, "Id is not in proper Format")
+	}
+
+	found, err := dbQueries.CheckID(ctx, id)
+	if err != nil {
+		log.Fatalf("Error while checking the ID")
+		return nil, err
+	}
+
+	if !found {
+		log.Printf("ID:%v is not present in Database", id)
+		return nil, status.Errorf(codes.NotFound, "ID is not found")
+	}
+
+	data := req.Anime
+	// Validate the incoming data meets the required conditions
+	// validateData(data)
+
 	if ctx.Err() == context.DeadlineExceeded {
 		log.Printf("Deadline is Exceeded")
 		return nil, status.Error(codes.DeadlineExceeded, "Request deadline Exceeded")
@@ -158,15 +205,9 @@ func (server *AnimeServer) UpdateAnime(ctx context.Context, req *animepb.UpdateA
 		return nil, status.Error(codes.Canceled, "Request is Canceled")
 	}
 
-	err = dbQueries.UpdateAnime(ctx, req.Anime)
+	err = dbQueries.UpdateAnime(ctx, data)
 	if err != nil {
 		log.Fatalf("Error while updating the Anime")
-		return nil, err
-	}
-
-	id, err := strconv.ParseInt(req.GetId(), 10, 64)
-	if err != nil {
-		log.Fatalf("Id is not in proper Format\n")
 		return nil, err
 	}
 
@@ -190,6 +231,23 @@ func (server *AnimeServer) DeleteAnime(ctx context.Context, req *animepb.DeleteA
 		return nil, err
 	}
 
+	id, err := strconv.ParseInt(req.GetId(), 10, 64)
+	if err != nil {
+		log.Printf("Id is not in proper Format\n")
+		return nil, status.Errorf(codes.InvalidArgument, "Id is not in proper Format")
+	}
+
+	found, err := dbQueries.CheckID(ctx, id)
+	if err != nil {
+		log.Fatalf("Error while checking the ID")
+		return nil, err
+	}
+
+	if !found {
+		log.Printf("ID:%v is not present in Database", id)
+		return nil, status.Errorf(codes.NotFound, "ID is not found")
+	}
+
 	if ctx.Err() == context.DeadlineExceeded {
 		log.Printf("Deadline is Exceeded")
 		return nil, status.Error(codes.DeadlineExceeded, "Request deadline Exceeded")
@@ -198,12 +256,6 @@ func (server *AnimeServer) DeleteAnime(ctx context.Context, req *animepb.DeleteA
 	if ctx.Err() == context.Canceled {
 		log.Printf("Request is Canceled")
 		return nil, status.Error(codes.Canceled, "Request is Canceled")
-	}
-
-	id, err := strconv.ParseInt(req.GetId(), 10, 64)
-	if err != nil {
-		log.Fatalf("Id is not in proper Format\n")
-		return nil, err
 	}
 
 	err = dbQueries.DeleteAnime(ctx, id)

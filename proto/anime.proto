@@ -53,18 +53,22 @@ message Anime {
   string id = 1;
   // Name (Title) of the Anime 
   string name = 2;
+  // Type of Anime - TV Series/Netflix Original/Web Series
+  string type = 3;
   // Short description of Anime, at most 50 words
-  string description = 3;
+  string summary = 6;
   // Number of Episodes in the particular Anime
-  int32 num_of_episodes = 4;
+  int32 num_of_episodes = 7;
   // Cast of that Anime
-  repeated string cast = 5;
+  repeated string other_names = 8;
   // Status of the Anime
-  string status = 6;
+  string status = 9;
   // Genre of the Anime
-  repeated string genre = 7;
+  repeated string genre = 10;
+  // Year of release of the Anime
+  int32 released = 12;
   // Time of Creating the Record for Anime
-  string created_at = 10;
+  string created_at = 14;
 
   // // Defining the Enum Status
   // enum Status {
@@ -82,8 +86,8 @@ message Anime {
 message ListAnimesRequest {
   // Page number requested
   int32 page = 1;
-  // The option to sort by - 
-  Sort sort = 2;
+  // The option to sort by - Name/Status/Released 
+  string sort = 2;
   // Order of Sorting - Ascending/Descending
   Order order = 3;
   // Filters for search or display
@@ -91,22 +95,22 @@ message ListAnimesRequest {
   // The substring for search query
   string search = 5;
 
-  // Defining the Enum Sort
-  enum Sort {
-    // Option to Sort by Name
-    NAME = 0;
-    // Option to sort by number of Episodes
-    NUMOFEPISODES = 1;
-    // Option to Sort by Rating
-    RATING = 2;
-  }
+  // // Defining the Enum Sort
+  // enum Sort {
+  //   // Option to Sort by Name
+  //   NAME = 0;
+  //   // Option to sort by number of Episodes
+  //   NUMOFEPISODES = 1;
+  //   // Option to Sort by Rating
+  //   RATING = 2;
+  // }
 
   // Defining the Enum Order 
   enum Order {    
-    // Option for Ordering in Descending format
-    DESCENDING = 0;
     // Option for Ordering in Ascending format
-    ASCENDING = 1;
+    ASC = 0;
+    // Option for Ordering in Descending format
+    DESC = 1;
   }
 }
 

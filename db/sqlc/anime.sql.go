@@ -10,38 +10,55 @@ import (
 	"github.com/lib/pq"
 )
 
+const checkID = `-- name: CheckID :one
+SELECT EXISTS(SELECT 1 FROM animes WHERE id=$1) as "exists"
+`
+
+func (q *Queries) CheckID(ctx context.Context, id int64) (bool, error) {
+	row := q.db.QueryRowContext(ctx, checkID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createAnime = `-- name: CreateAnime :one
 INSERT INTO animes (
   name, 
-  description,
+  type,
+  summary,
   num_of_episodes, 
-  "cast",
+  other_names,
   status, 
-  genre
+  genre,
+  released
 ) VALUES (
-  $1, $2, $3, $4, $5, $6
+  $1, $2, $3, $4, $5, $6, $7, $8
 )
-RETURNING id, name, description, status, num_of_episodes, "cast", genre, created_at
+RETURNING id, name, type, summary, num_of_episodes, other_names, status, genre, released, created_at
 `
 
 func (q *Queries) CreateAnime(ctx context.Context, arg *animepb.Anime) (*animepb.Anime, error) {
 	row := q.db.QueryRowContext(ctx, createAnime,
 		arg.Name,
-		arg.Description,
+		arg.Type,
+		arg.Summary,
 		arg.NumOfEpisodes,
-		pq.Array(arg.Cast),
+		pq.Array(arg.OtherNames),
 		arg.Status,
 		pq.Array(arg.Genre),
+		arg.Released,
 	)
 	var i animepb.Anime
 	err := row.Scan(
 		&i.Id,
 		&i.Name,
-		&i.Description,
-		&i.Status,
+		&i.Type,
+		&i.Summary,
 		&i.NumOfEpisodes,
-		pq.Array(&i.Cast),
+		pq.Array(&i.OtherNames),
+		&i.Status,
 		pq.Array(&i.Genre),
+		&i.Released,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -58,7 +75,7 @@ func (q *Queries) DeleteAnime(ctx context.Context, id int64) error {
 }
 
 const getAnime = `-- name: GetAnime :one
-SELECT id, name, description, status, num_of_episodes, "cast", genre, created_at FROM animes
+SELECT id, name, type, summary, num_of_episodes, other_names, status, genre, released, created_at FROM animes
 WHERE id = $1 LIMIT 1
 `
 
@@ -68,24 +85,35 @@ func (q *Queries) GetAnime(ctx context.Context, id int64) (*animepb.Anime, error
 	err := row.Scan(
 		&i.Id,
 		&i.Name,
-		&i.Description,
-		&i.Status,
+		&i.Type,
+		&i.Summary,
 		&i.NumOfEpisodes,
-		pq.Array(&i.Cast),
+		pq.Array(&i.OtherNames),
+		&i.Status,
 		pq.Array(&i.Genre),
+		&i.Released,
 		&i.CreatedAt,
 	)
 	return &i, err
 }
 
+// animes.type, animes.summary, animes.num_of_episodes, animes.other_names, animes.status, animes.genre, animes.released, animes.created_at
+
 const listAnimes = `-- name: ListAnimes :many
-SELECT id, name, description, status, num_of_episodes, "cast", genre, created_at FROM animes 
-ORDER BY NAME 
-LIMIT 10 OFFSET ($1-1)*10
+SELECT animes.id, animes.name, animes.type, animes.summary, animes.num_of_episodes, animes.other_names, animes.status, animes.genre, animes.released, animes.created_at FROM ( SELECT id, name, type, summary, num_of_episodes, other_names, status, genre, released, created_at FROM animes
+WHERE name LIKE ( SELECT CONCAT ('%' , $1::text , '%') ) ) AS "animes"
+ORDER BY animes.name ASC
+OFFSET ($2::int-1)*10 LIMIT 10
 `
 
-func (q *Queries) ListAnimes(ctx context.Context, dollar_1 interface{}) ([]*animepb.Anime, error) {
-	rows, err := q.db.QueryContext(ctx, listAnimes, dollar_1)
+type ListAnimesParams struct {
+	Column1 string `json:"column1"`
+	Column2 int32  `json:"column2"`
+	// Column3 string `json:"column3"`
+}
+
+func (q *Queries) ListAnimes(ctx context.Context, arg ListAnimesParams) ([]*animepb.Anime, error) {
+	rows, err := q.db.QueryContext(ctx, listAnimes, arg.Column1, arg.Column2)
 	if err != nil {
 		return nil, err
 	}
@@ -96,11 +124,13 @@ func (q *Queries) ListAnimes(ctx context.Context, dollar_1 interface{}) ([]*anim
 		if err := rows.Scan(
 			&i.Id,
 			&i.Name,
-			&i.Description,
-			&i.Status,
+			&i.Type,
+			&i.Summary,
 			&i.NumOfEpisodes,
-			pq.Array(&i.Cast),
+			pq.Array(&i.OtherNames),
+			&i.Status,
 			pq.Array(&i.Genre),
+			&i.Released,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -118,23 +148,28 @@ func (q *Queries) ListAnimes(ctx context.Context, dollar_1 interface{}) ([]*anim
 
 const updateAnime = `-- name: UpdateAnime :exec
 UPDATE animes SET 
-  name = $2,
-  description = $3,
-  num_of_episodes = $4,
-  "cast" = $5,
-  status = $6,
-  genre = $7
+  name = $2, 
+  type = $3,
+  summary = $4,
+  num_of_episodes = $5, 
+  other_names = $6,
+  status = $7, 
+  genre = $8,
+  released = $9
 WHERE id = $1
 `
 
 func (q *Queries) UpdateAnime(ctx context.Context, arg *animepb.Anime) error {
 	_, err := q.db.ExecContext(ctx, updateAnime,
+		arg.Id,
 		arg.Name,
-		arg.Description,
+		arg.Type,
+		arg.Summary,
 		arg.NumOfEpisodes,
-		pq.Array(arg.Cast),
+		pq.Array(arg.OtherNames),
 		arg.Status,
 		pq.Array(arg.Genre),
+		arg.Released,
 	)
 	return err
 }

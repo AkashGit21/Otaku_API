@@ -10,11 +10,13 @@ import (
 type Anime struct {
 	ID            int64         `json:"id"`
 	Name          string        `json:"name"`
-	Description   string        `json:"description"`
-	Status        string        `json:"status"`
+	Type          string        `json:"type"`
+	Summary       string        `json:"summary"`
 	NumOfEpisodes sql.NullInt32 `json:"numOfEpisodes"`
-	Cast          []string      `json:"cast"`
+	OtherNames    []string      `json:"otherNames"`
+	Status        string        `json:"status"`
 	Genre         []string      `json:"genre"`
+	Released      int32         `json:"released"`
 	CreatedAt     time.Time     `json:"createdAt"`
 }
 

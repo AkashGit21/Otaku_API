@@ -45,28 +45,22 @@
           },
           {
             "name": "sort",
-            "description": "The option to sort by -.\n\n - NAME: Option to Sort by Name\n - NUMOFEPISODES: Option to sort by number of Episodes\n - RATING: Option to Sort by Rating",
+            "description": "The option to sort by - Name/Status/Released.",
             "in": "query",
             "required": false,
-            "type": "string",
-            "enum": [
-              "NAME",
-              "NUMOFEPISODES",
-              "RATING"
-            ],
-            "default": "NAME"
+            "type": "string"
           },
           {
             "name": "order",
-            "description": "Order of Sorting - Ascending/Descending.\n\n - DESCENDING: Option for Ordering in Descending format\n - ASCENDING: Option for Ordering in Ascending format",
+            "description": "Order of Sorting - Ascending/Descending.\n\n - ASC: Option for Ordering in Ascending format\n - DESC: Option for Ordering in Descending format",
             "in": "query",
             "required": false,
             "type": "string",
             "enum": [
-              "DESCENDING",
-              "ASCENDING"
+              "ASC",
+              "DESC"
             ],
-            "default": "DESCENDING"
+            "default": "ASC"
           },
           {
             "name": "filter",
@@ -225,23 +219,12 @@
     "ListAnimesRequestOrder": {
       "type": "string",
       "enum": [
-        "DESCENDING",
-        "ASCENDING"
+        "ASC",
+        "DESC"
       ],
-      "default": "DESCENDING",
-      "description": "- DESCENDING: Option for Ordering in Descending format\n - ASCENDING: Option for Ordering in Ascending format",
+      "default": "ASC",
+      "description": "- ASC: Option for Ordering in Ascending format\n - DESC: Option for Ordering in Descending format",
       "title": "Defining the Enum Order"
-    },
-    "ListAnimesRequestSort": {
-      "type": "string",
-      "enum": [
-        "NAME",
-        "NUMOFEPISODES",
-        "RATING"
-      ],
-      "default": "NAME",
-      "description": "- NAME: Option to Sort by Name\n - NUMOFEPISODES: Option to sort by number of Episodes\n - RATING: Option to Sort by Rating",
-      "title": "Defining the Enum Sort"
     },
     "animeAnime": {
       "type": "object",
@@ -253,7 +236,11 @@
           "type": "string",
           "title": "Name (Title) of the Anime"
         },
-        "description": {
+        "type": {
+          "type": "string",
+          "title": "Type of Anime - TV Series/Netflix Original/Web Series"
+        },
+        "summary": {
           "type": "string",
           "title": "Short description of Anime, at most 50 words"
         },
@@ -262,7 +249,7 @@
           "format": "int32",
           "title": "Number of Episodes in the particular Anime"
         },
-        "cast": {
+        "otherNames": {
           "type": "array",
           "items": {
             "type": "string"
@@ -279,6 +266,11 @@
             "type": "string"
           },
           "title": "Genre of the Anime"
+        },
+        "released": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Year of release of the Anime"
         },
         "createdAt": {
           "type": "string",

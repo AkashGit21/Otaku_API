@@ -44,15 +44,15 @@ func RandomName() string {
 	return RandomString(15)
 }
 
-func RandomDescriptiion() string {
+func RandomSummary() string {
 	return RandomString(100)
 }
 
 func RandomEpisodes() int32 {
-	return RandomInt(0, 1000)
+	return RandomInt(11, 1000)
 }
 
-func RandomCast() []string {
+func RandomNames() []string {
 	return RandomStringList()
 }
 

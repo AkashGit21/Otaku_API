@@ -1,19 +1,25 @@
--- name: ListAnimes :many
-SELECT * FROM animes 
-ORDER BY NAME 
-LIMIT 10 OFFSET ($1-1)*10;
 
+-- name: CheckID :one
+SELECT EXISTS(SELECT 1 FROM animes WHERE id=$1) as "exists";
+
+-- name: ListAnimes :many
+SELECT * FROM ( SELECT * FROM animes
+WHERE name LIKE ('%' + $3::text + '%')  ) AS "animes"
+ORDER BY $1::text DESC
+OFFSET ($2::int-1)*10 LIMIT 10;
 
 -- name: CreateAnime :one
 INSERT INTO animes (
   name, 
-  description,
+  type,
+  summary,
   num_of_episodes, 
-  "cast",
+  other_names,
   status, 
-  genre
+  genre,
+  released
 ) VALUES (
-  $1, $2, $3, $4, $5, $6
+  $1, $2, $3, $4, $5, $6, $7, $8
 )
 RETURNING *;
 
@@ -23,12 +29,14 @@ WHERE id = $1 LIMIT 1;
 
 -- name: UpdateAnime :exec
 UPDATE animes SET 
-  name = $2,
-  description = $3,
-  num_of_episodes = $4,
-  "cast" = $5,
-  status = $6,
-  genre = $7
+  name = $2, 
+  type = $3,
+  summary = $4,
+  num_of_episodes = $5, 
+  other_names = $6,
+  status = $7, 
+  genre = $8,
+  released = $9
 WHERE id = $1;
 
 -- name: DeleteAnime :exec

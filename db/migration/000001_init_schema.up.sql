@@ -9,11 +9,13 @@ CREATE TABLE "episodes" (
 CREATE TABLE "animes" (
   "id" bigserial PRIMARY KEY,
   "name" varchar UNIQUE NOT NULL,
-  "description" varchar NOT NULL,
-  "status" varchar NOT NULL,
+  "type" varchar NOT NULL,
+  "summary" varchar NOT NULL,
   "num_of_episodes" integer,
-  "cast" varchar[] NOT NULL,
+  "other_names" varchar[],
+  "status" varchar NOT NULL,
   "genre" varchar[] NOT NULL,
+  "released" integer NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -35,6 +37,10 @@ CREATE INDEX ON "episodes" ("number");
 CREATE INDEX ON "animes" ("name");
 
 CREATE INDEX ON "animes" ("status");
+
+CREATE INDEX ON "animes" ("genre");
+
+CREATE INDEX ON "animes" ("released");
 
 CREATE INDEX ON "characters" ("name");
 

@@ -12,11 +12,13 @@ import (
 func createRadomAnime(t *testing.T) (*animepb.Anime, error) {
 	arg := &animepb.Anime{
 		Name:          util.RandomName(),
-		Description:   util.RandomDescriptiion(),
-		Status:        "COMPLETED",
+		Type:          util.RandomString(8),
+		Summary:       util.RandomSummary(),
 		NumOfEpisodes: util.RandomEpisodes(),
-		Cast:          util.RandomCast(),
+		OtherNames:    util.RandomNames(),
+		Status:        "COMPLETED",
 		Genre:         util.RandomGenre(),
+		Released:      util.RandomInt(1990, 2022),
 	}
 
 	anime, err := testQueries.CreateAnime(context.Background(), arg)
@@ -24,11 +26,13 @@ func createRadomAnime(t *testing.T) (*animepb.Anime, error) {
 	require.NotEmpty(t, anime)
 
 	require.Equal(t, arg.Name, anime.Name)
-	require.Equal(t, arg.Description, anime.Description)
-	require.Equal(t, arg.Status, anime.Status)
+	require.Equal(t, arg.Type, anime.Type)
+	require.Equal(t, arg.Summary, anime.Summary)
 	require.Equal(t, arg.NumOfEpisodes, anime.NumOfEpisodes)
-	require.Equal(t, arg.Cast, anime.Cast)
+	require.Equal(t, arg.OtherNames, anime.OtherNames)
+	require.Equal(t, arg.Status, anime.Status)
 	require.Equal(t, arg.Genre, anime.Genre)
+	require.Equal(t, arg.Released, anime.Released)
 
 	return anime, err
 }
@@ -39,7 +43,13 @@ func TestCreateAnime(t *testing.T) {
 
 func TestListAnimes(t *testing.T) {
 
-	animes, err := testQueries.ListAnimes(context.Background(), 1)
+	arg := ListAnimesParams{
+		Column1: "a",
+		Column2: 1,
+		// Column3: "FCI",
+	}
+
+	animes, err := testQueries.ListAnimes(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, animes)
